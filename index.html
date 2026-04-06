@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2D5016">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MenuFamille">
+<link rel="manifest" href="data:application/json,{%22name%22:%22MenuFamille%22,%22short_name%22:%22Menu%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23FDFAF5%22,%22theme_color%22:%22%232D5016%22}">
+<title>MenuFamille</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --cream: #FDFAF5;
+  --cream2: #F5F0E8;
+  --green: #2D5016;
+  --green-light: #4A7A28;
+  --green-pale: #E8F0DC;
+  --green-mid: #C5D9A8;
+  --amber: #C8780A;
+  --amber-light: #FFF3DC;
+  --red: #C0392B;
+  --red-light: #FDECEA;
+  --blue: #1A4A8A;
+  --blue-light: #E8EFF8;
+  --gray: #6B6B5E;
+  --gray-light: #E8E5DE;
+  --text: #1A1A14;
+  --text2: #4A4A3E;
+  --border: rgba(45,80,22,0.15);
+  --shadow: 0 2px 12px rgba(45,80,22,0.1);
+  --radius: 14px;
+  --radius-sm: 8px;
+  font-size: 15px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+}
+
+h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--green);
+  color: white;
+  padding: 16px 20px 14px;
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topbar h1 { font-size: 1.3rem; letter-spacing: -0.5px; }
+.topbar .subtitle { font-size: 0.72rem; opacity: 0.7; font-weight: 300; margin-top: 1px; }
+.api-btn {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
+.api-btn.configured { background: rgba(100,200,80,0.3); border-color: rgba(100,200,80,0.5); }
+
+/* ── NAV TABS ── */
+.nav {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 70px; z-index: 99;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-tab {
+  flex: none;
+  padding: 11px 16px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--gray);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+}
+.nav-tab.active { color: var(--green); border-bottom-color: var(--green); }
+.nav-tab:hover:not(.active) { color: var(--text); background: var(--cream); }
+
+/* ── PAGES ── */
+.page { display: none; padding: 20px; animation: fadeIn 0.2s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── CARDS ── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--green);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title .icon { font-size: 1.1rem; }
+
+/* ── FORM ELEMENTS ── */
+.form-group { margin-bottom: 13px; }
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 5px;
+}
+input[type=text], input[type=url], textarea, select {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid var(--gray-light);
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  background: var(--cream);
+  color: var(--text);
+  transition: border-color 0.2s;
+  outline: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--green); background: white; }
+textarea { resize: vertical; min-height: 80px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 20px;
+  border-radius: 40px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s;
+  letter-spacing: 0.01em;
+}
+.btn-primary { background: var(--green); color: white; }
+.btn-primary:hover { background: var(--green-light); transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary { background: var(--green-pale); color: var(--green); border: 1.5px solid var(--green-mid); }
+.btn-secondary:hover { background: var(--green-mid); }
+.btn-danger { background: var(--red-light); color: var(--red); border: 1.5px solid rgba(192,57,43,0.2); }
+.btn-amber { background: var(--amber-light); color: var(--amber); border: 1.5px solid rgba(200,120,10,0.2); }
+.btn-full { width: 100%; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* ── TOGGLE SWITCH ── */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-light);
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label { font-size: 0.88rem; font-weight: 500; }
+.toggle-sub { font-size: 0.75rem; color: var(--gray); margin-top: 2px; }
+.toggle {
+  position: relative; width: 44px; height: 24px;
+  background: var(--gray-light); border-radius: 12px;
+  cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+}
+.toggle.on { background: var(--green); }
+.toggle::after {
+  content: ''; position: absolute;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: white; top: 3px; left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on::after { transform: translateX(20px); }
+
+/* ── BADGE / TAG ── */
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.badge-green { background: var(--green-pale); color: var(--green); }
+.badge-amber { background: var(--amber-light); color: var(--amber); }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-blue { background: var(--blue-light); color: var(--blue); }
+.badge-gray { background: var(--gray-light); color: var(--gray); }
+
+/* ── MENU CALENDAR ── */
+.week-header {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  color: var(--green);
+  margin: 18px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--green-pale);
+}
+.day-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.day-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px 8px;
+  background: var(--green-pale);
+  border-bottom: 1px solid var(--border);
+}
+.day-name { font-weight: 600; font-size: 0.88rem; color: var(--green); }
+.day-date { font-size: 0.75rem; color: var(--gray); }
+.meal-slot {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--gray-light);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.meal-slot:last-child { border-bottom: none; }
+.meal-time { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gray); }
+.meal-name { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+.meal-note { font-size: 0.72rem; color: var(--amber); font-style: italic; }
+.meal-reste { font-size: 0.7rem; color: var(--blue); background: var(--blue-light); padding: 2px 7px; border-radius: 10px; display: inline-block; margin-top: 2px; }
+.meal-prep-note { font-size: 0.7rem; color: var(--green); background: var(--green-pale); padding: 2px 7px; border-radius: 10px; display: inline-block; margin-top: 2px; }
+.day-card.vacances .day-header { background: var(--amber-light); }
+.day-card.vacances .day-name { color: var(--amber); }
+
+/* ── SHOPPING LIST ── */
+.shop-section { margin-bottom: 16px; }
+.shop-section-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--green);
+  padding: 8px 0 6px;
+  border-bottom: 1.5px solid var(--green-pale);
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.shop-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--gray-light);
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 4px;
+}
+.shop-item:last-child { border-bottom: none; }
+.shop-item.checked { opacity: 0.45; }
+.shop-item.checked .shop-item-name { text-decoration: line-through; }
+.shop-check {
+  width: 20px; height: 20px; border-radius: 5px;
+  border: 1.5px solid var(--green-mid);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; color: white;
+  transition: all 0.15s;
+}
+.shop-item.checked .shop-check { background: var(--green); border-color: var(--green); }
+.shop-item-name { font-size: 0.88rem; flex: 1; }
+.shop-item-qty { font-size: 0.78rem; color: var(--gray); white-space: nowrap; }
+
+/* ── RECETTE CARD ── */
+.recette-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 13px 15px;
+  margin-bottom: 10px;
+  display: flex; align-items: flex-start; gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.recette-card:hover { border-color: var(--green-mid); box-shadow: var(--shadow); }
+.recette-number {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: var(--green-pale); color: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.88rem; flex-shrink: 0;
+  font-family: 'Playfair Display', serif;
+}
+.recette-info { flex: 1; }
+.recette-name { font-weight: 600; font-size: 0.92rem; margin-bottom: 3px; }
+.recette-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.recette-ingredients { font-size: 0.75rem; color: var(--gray); margin-top: 4px; line-height: 1.5; }
+
+/* ── QR CODE ── */
+#qr-container {
+  display: flex; justify-content: center; align-items: center;
+  padding: 20px;
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+#qr-code { display: inline-block; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 200;
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--cream);
+  border-radius: var(--radius) var(--radius) 0 0;
+  width: 100%; max-width: 480px;
+  max-height: 85vh; overflow-y: auto;
+  padding: 24px 20px 32px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; color: var(--green);
+  margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-close { font-size: 1.4rem; cursor: pointer; color: var(--gray); line-height: 1; }
+
+/* ── LOADER ── */
+.loader-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(253,250,245,0.92); z-index: 300;
+  flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+}
+.loader-overlay.open { display: flex; }
+.loader-text { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--green); text-align: center; max-width: 260px; }
+.loader-sub { font-size: 0.8rem; color: var(--gray); }
+.spinner {
+  width: 48px; height: 48px; border: 3px solid var(--green-pale);
+  border-top-color: var(--green); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── ALERT / TOAST ── */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--text); color: white;
+  padding: 11px 20px; border-radius: 30px;
+  font-size: 0.85rem; z-index: 400;
+  transition: transform 0.3s; white-space: nowrap;
+  max-width: 320px; text-align: center;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+
+/* ── CONTRAINTES PAGE ── */
+.contrainte-item {
+  display: flex; gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--gray-light);
+  align-items: flex-start;
+}
+.contrainte-item:last-child { border-bottom: none; }
+.contrainte-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.contrainte-text { font-size: 0.85rem; line-height: 1.5; flex: 1; }
+.contrainte-text strong { color: var(--green); }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 40px 20px;
+  color: var(--gray);
+}
+.empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
+.empty-state p { font-size: 0.88rem; line-height: 1.6; }
+
+/* ── IMPORT SECTION ── */
+.import-help {
+  background: var(--blue-light);
+  border: 1px solid rgba(26,74,138,0.2);
+  border-radius: var(--radius-sm);
+  padding: 13px 15px;
+  font-size: 0.8rem;
+  color: var(--blue);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.import-help code {
+  background: rgba(26,74,138,0.12);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-family: monospace;
+}
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.section-header h2 { font-size: 1.15rem; }
+
+/* ── VACANCES BANNER ── */
+.vacances-banner {
+  background: var(--amber-light);
+  border: 1.5px solid rgba(200,120,10,0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--amber);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>🌿 MenuFamille</h1>
+    <div class="subtitle">Planificateur de menus familial</div>
+  </div>
+  <button class="api-btn" id="api-btn" onclick="openApiModal()">⚙ Clé API</button>
+</div>
+
+<!-- NAVIGATION -->
+<nav class="nav" id="nav">
+  <div class="nav-tab active" onclick="showPage('menu')">📅 Menu</div>
+  <div class="nav-tab" onclick="showPage('courses')">🛒 Courses</div>
+  <div class="nav-tab" onclick="showPage('recettes')">📖 Recettes</div>
+  <div class="nav-tab" onclick="showPage('partage')">📲 Partage</div>
+  <div class="nav-tab" onclick="showPage('contraintes')">📋 Contraintes</div>
+  <div class="nav-tab" onclick="showPage('reglages')">⚙ Réglages</div>
+</nav>
+
+<!-- ════════════════════════════════════ PAGE MENU ════════════════════════════════════ -->
+<div class="page active" id="page-menu">
+
+  <div id="vacances-banner" class="vacances-banner" style="display:none">
+    🏖 Mode vacances activé — contraintes de restes désactivées
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🗓</span> Générer le menu</div>
+    <div class="form-group">
+      <label>Début de la période (mercredi)</label>
+      <input type="date" id="menu-start" style="width:100%;padding:10px 13px;border:1.5px solid var(--gray-light);border-radius:var(--radius-sm);font-family:DM Sans,sans-serif;font-size:0.9rem;background:var(--cream);color:var(--text);outline:none;">
+    </div>
+    <div class="form-group">
+      <label>Notes spéciales pour cette période</label>
+      <textarea id="menu-notes" placeholder="Ex: Paul absent mercredi soir sem 1, invités samedi sem 2…" rows="3"></textarea>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="generateMenu()" id="gen-btn">
+      ✨ Générer le menu avec l'IA
+    </button>
+  </div>
+
+  <div id="menu-display"></div>
+</div>
+
+<!-- ════════════════════════════════════ PAGE COURSES ════════════════════════════════════ -->
+<div class="page" id="page-courses">
+  <div class="section-header">
+    <h2>Liste de courses</h2>
+    <button class="btn btn-secondary" onclick="resetChecked()" style="font-size:0.78rem;padding:7px 13px">↺ Tout décocher</button>
+  </div>
+  <div id="courses-display">
+    <div class="empty-state">
+      <div class="icon">🛒</div>
+      <p>Génère d'abord ton menu pour obtenir la liste de courses automatiquement.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════ PAGE RECETTES ════════════════════════════════════ -->
+<div class="page" id="page-recettes">
+  <div class="section-header">
+    <h2>Mes recettes</h2>
+    <button class="btn btn-primary" onclick="openRecetteModal()" style="font-size:0.8rem;padding:8px 14px">+ Ajouter</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📊</span> Google Sheets</div>
+    <div id="gsheet-status" style="font-size:0.82rem;color:var(--gray);margin-bottom:12px;line-height:1.6"></div>
+    <button class="btn btn-primary btn-full" onclick="syncGSheet()" id="sync-btn">
+      🔄 Synchroniser les recettes
+    </button>
+  </div>
+
+  <div id="recettes-list"></div>
+</div>
+
+<!-- ════════════════════════════════════ PAGE PARTAGE ════════════════════════════════════ -->
+<div class="page" id="page-partage">
+  <div class="card">
+    <div class="card-title"><span class="icon">📲</span> Partager le menu</div>
+    <p style="font-size:0.85rem;color:var(--gray);margin-bottom:14px;line-height:1.6">
+      Le QR code contient le menu et la liste de courses. Les membres de la famille le scannent pour importer directement dans leur application.
+    </p>
+    <div id="qr-container">
+      <div style="text-align:center;color:var(--gray);font-size:0.85rem">
+        <div style="font-size:2rem;margin-bottom:8px">📲</div>
+        Génère d'abord un menu pour créer le QR code
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="generateQR()" id="qr-btn">
+      Générer le QR code
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📥</span> Importer via QR code scanné</div>
+    <p style="font-size:0.85rem;color:var(--gray);margin-bottom:12px;line-height:1.6">
+      Si quelqu'un t'a partagé un menu, colle le lien ou le code ici :
+    </p>
+    <textarea id="import-data" placeholder="Colle ici le contenu du QR code partagé…" rows="4"></textarea>
+    <button class="btn btn-secondary btn-full" onclick="importSharedData()" style="margin-top:10px">
+      📥 Importer ce menu
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════ PAGE CONTRAINTES ════════════════════════════════════ -->
+<div class="page" id="page-contraintes">
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🏖</span> Mode vacances</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Activer le mode vacances</div>
+        <div class="toggle-sub">Désactive les contraintes de restes</div>
+      </div>
+      <div class="toggle" id="vacances-toggle" onclick="toggleVacances()"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span> Contraintes permanentes</div>
+
+    <div class="contrainte-item">
+      <div class="contrainte-icon">📅</div>
+      <div class="contrainte-text">Le menu s'organise du <strong>mercredi au mercredi</strong>.</div>
+    </div>
+    <div class="contrainte-item">
+      <div class="contrainte-icon">🍱</div>
+      <div class="contrainte-text"><strong>Lundi midi :</strong> reste du samedi ou dimanche. Plat pouvant être mangé en voiture ou hors maison, préparé le dimanche.</div>
+    </div>
+    <div class="contrainte-item">
+      <div class="contrainte-icon">🍱</div>
+      <div class="contrainte-text"><strong>Mardi midi :</strong> reste du samedi, dimanche ou lundi soir. Préparé le dimanche.</div>
+    </div>
+    <div class="contrainte-item">
+      <div class="contrainte-icon">🍱</div>
+      <div class="contrainte-text"><strong>Jeudi midi :</strong> reste du lundi, mardi ou mercredi.</div>
+    </div>
+    <div class="contrainte-item">
+      <div class="contrainte-icon">🍱</div>
+      <div class="contrainte-text"><strong>Vendredi midi :</strong> reste du jeudi soir.</div>
+    </div>
+    <div class="contrainte-item">
+      <div class="contrainte-icon">🔄</div>
+      <div class="contrainte-text"><strong>Aucun plat répété</strong> sur les 2 semaines. Les quantités de courses tiennent compte des restes.</div>
+    </div>
+    <div class="contrainte-item">
+      <div class="contrainte-icon">👨‍👩‍👧‍👦</div>
+      <div class="contrainte-text">Famille de <strong>3 à 4 personnes</strong>. Les jours de restes : prévoir une portion supplémentaire le jour de cuisson.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">📝</span> Contraintes ponctuelles</div>
+    <p style="font-size:0.82rem;color:var(--gray);margin-bottom:12px">Ces contraintes s'ajoutent lors de la génération du menu dans le champ "Notes spéciales".</p>
+    <textarea placeholder="Ex: Végétarien sem 2, invités vendredi, allergie aux noix pour la semaine 1…" rows="4" id="contraintes-custom"></textarea>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="saveCustomContraintes()">💾 Sauvegarder</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════ PAGE RÉGLAGES ════════════════════════════════════ -->
+<div class="page" id="page-reglages">
+  <div class="card">
+    <div class="card-title"><span class="icon">⚙</span> Clé API Google Gemini (gratuit)</div>
+    <div class="import-help" style="background:var(--green-pale);border-color:var(--green-mid);color:var(--green)">
+      <strong>Comment obtenir ta clé gratuite :</strong><br>
+      1. Va sur <strong>aistudio.google.com</strong><br>
+      2. Connecte-toi avec ton compte Google<br>
+      3. Clique <strong>"Get API Key"</strong> → <strong>"Create API key"</strong><br>
+      4. Colle la clé ici. Elle commence par <code>AIza</code>
+    </div>
+    <div class="form-group">
+      <label>Ta clé API Gemini</label>
+      <input type="text" id="api-key-input" placeholder="AIzaSy…" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="saveApiKey()">💾 Enregistrer la clé</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">👨‍👩‍👧‍👦</span> Membres de la famille</div>
+    <div id="membres-list"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input type="text" id="new-membre" placeholder="Prénom du membre…" style="flex:1">
+      <button class="btn btn-secondary" onclick="addMembre()">+ Ajouter</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="icon">🗑</span> Données</div>
+    <button class="btn btn-danger btn-full" onclick="if(confirm('Effacer toutes les données ?')) clearAll()">
+      Réinitialiser l'application
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════ MODALS ════════════════════════════════════ -->
+
+<!-- Modal: API Key -->
+<div class="modal-overlay" id="modal-api">
+  <div class="modal">
+    <div class="modal-title">Clé API Google Gemini <span class="modal-close" onclick="closeModal('modal-api')">×</span></div>
+    <div class="import-help" style="background:var(--green-pale);border-color:var(--green-mid);color:var(--green)">
+      <strong>Comment obtenir ta clé gratuite :</strong><br>
+      1. Va sur <strong>aistudio.google.com</strong><br>
+      2. Connecte-toi avec ton compte Google<br>
+      3. Clique <strong>"Get API Key"</strong> → <strong>"Create API key"</strong><br>
+      4. Colle la clé ici (commence par <code>AIza</code>)
+    </div>
+    <div class="form-group">
+      <label>Ta clé API Gemini</label>
+      <input type="text" id="api-key-modal" placeholder="AIzaSy…" autocomplete="off">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveApiKeyFromModal()">💾 Enregistrer</button>
+  </div>
+</div>
+
+<!-- Modal: Recette -->
+<div class="modal-overlay" id="modal-recette">
+  <div class="modal">
+    <div class="modal-title">Recette <span class="modal-close" onclick="closeModal('modal-recette')">×</span></div>
+    <input type="hidden" id="recette-edit-id">
+    <div class="form-group">
+      <label>Nom de la recette *</label>
+      <input type="text" id="r-nom" placeholder="Ex: Poulet rôti aux herbes">
+    </div>
+    <div class="form-group">
+      <label>Ingrédients (séparés par des virgules) *</label>
+      <textarea id="r-ingredients" placeholder="poulet, thym, ail, citron, pommes de terre, huile d'olive" rows="3"></textarea>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="form-group" style="flex:1">
+        <label>Tag</label>
+        <select id="r-tag">
+          <option value="T">T — Plat complet</option>
+          <option value="P">P — Plat (+ accompagnement)</option>
+          <option value="A">A — Accompagnement</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>Nombre de parts</label>
+        <input type="number" id="r-parts" placeholder="4" min="1" max="20">
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="saveRecette()">💾 Enregistrer</button>
+      <button class="btn btn-danger" id="delete-recette-btn" style="display:none" onclick="deleteRecette()">🗑 Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADER -->
+<div class="loader-overlay" id="loader">
+  <div class="spinner"></div>
+  <div class="loader-text" id="loader-text">Génération du menu en cours…</div>
+  <div class="loader-sub">L'IA prépare vos 2 semaines de repas</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE & STORAGE
+// ═══════════════════════════════════════════════════════
+const DB_KEY = 'menufamille_v1';
+
+function loadDB() {
+  try { return JSON.parse(localStorage.getItem(DB_KEY)) || defaultDB(); }
+  catch(e) { return defaultDB(); }
+}
+
+function defaultDB() {
+  return {
+    apiKey: '',
+    recettes: [],
+    currentMenu: null,
+    currentCourses: null,
+    vacancesMode: false,
+    membres: ['Maman', 'Papa'],
+    customContraintes: '',
+    checkedItems: {}
+  };
+}
+
+function saveDB() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+let db = loadDB();
+
+// ═══════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  const order = ['menu','courses','recettes','partage','contraintes','reglages'];
+  tabs[order.indexOf(id)].classList.add('active');
+  if (id === 'recettes') { renderRecettes(); updateGSheetStatus(); }
+  if (id === 'courses') renderCourses();
+  if (id === 'reglages') renderReglages();
+  if (id === 'contraintes') {
+    document.getElementById('contraintes-custom').value = db.customContraintes || '';
+    updateVacancesToggle();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+function openApiModal() {
+  document.getElementById('api-key-modal').value = db.apiKey || '';
+  openModal('modal-api');
+}
+
+// ═══════════════════════════════════════════════════════
+// API KEY
+// ═══════════════════════════════════════════════════════
+function saveApiKey() {
+  const k = document.getElementById('api-key-input').value.trim();
+  if (!k) { toast('Entre une clé API valide', 'error'); return; }
+  db.apiKey = k; saveDB();
+  updateApiBtn();
+  toast('Clé API enregistrée ✓', 'success');
+}
+function saveApiKeyFromModal() {
+  const k = document.getElementById('api-key-modal').value.trim();
+  if (!k) { toast('Entre une clé API valide', 'error'); return; }
+  db.apiKey = k; saveDB();
+  updateApiBtn();
+  closeModal('modal-api');
+  toast('Clé API enregistrée ✓', 'success');
+}
+function updateApiBtn() {
+  const btn = document.getElementById('api-btn');
+  if (db.apiKey) { btn.textContent = '✓ Gemini OK'; btn.classList.add('configured'); }
+  else { btn.textContent = '⚙ Clé API'; btn.classList.remove('configured'); }
+  const inp = document.getElementById('api-key-input');
+  if (inp) inp.value = db.apiKey || '';
+}
+
+// ═══════════════════════════════════════════════════════
+// VACANCES
+// ═══════════════════════════════════════════════════════
+function toggleVacances() {
+  db.vacancesMode = !db.vacancesMode; saveDB();
+  updateVacancesToggle();
+}
+function updateVacancesToggle() {
+  const t = document.getElementById('vacances-toggle');
+  const b = document.getElementById('vacances-banner');
+  if (db.vacancesMode) { t.classList.add('on'); b.style.display = 'flex'; }
+  else { t.classList.remove('on'); b.style.display = 'none'; }
+}
+
+// ═══════════════════════════════════════════════════════
+// RECETTES
+// ═══════════════════════════════════════════════════════
+function openRecetteModal(id = null) {
+  const editBtn = document.getElementById('delete-recette-btn');
+  if (id) {
+    const r = db.recettes.find(x => x.id === id);
+    document.getElementById('recette-edit-id').value = id;
+    document.getElementById('r-nom').value = r.nom;
+    document.getElementById('r-ingredients').value = r.ingredients.join(', ');
+    document.getElementById('r-tag').value = r.tag || 'T';
+    document.getElementById('r-parts').value = r.nbParts || 4;
+    editBtn.style.display = 'inline-flex';
+  } else {
+    document.getElementById('recette-edit-id').value = '';
+    document.getElementById('r-nom').value = '';
+    document.getElementById('r-ingredients').value = '';
+    document.getElementById('r-tag').value = 'T';
+    document.getElementById('r-parts').value = '4';
+    editBtn.style.display = 'none';
+  }
+  openModal('modal-recette');
+}
+
+function saveRecette() {
+  const nom = document.getElementById('r-nom').value.trim();
+  const ings = document.getElementById('r-ingredients').value.trim();
+  if (!nom || !ings) { toast('Nom et ingrédients sont requis', 'error'); return; }
+  const id = document.getElementById('recette-edit-id').value;
+  const r = {
+    id: id || Date.now().toString(),
+    nom,
+    ingredients: ings.split(',').map(s => s.trim()).filter(Boolean),
+    tag: document.getElementById('r-tag').value || 'T',
+    nbParts: parseInt(document.getElementById('r-parts').value) || 4,
+    fromSheet: false
+  };
+  if (id) {
+    const idx = db.recettes.findIndex(x => x.id === id);
+    db.recettes[idx] = r;
+  } else {
+    db.recettes.push(r);
+  }
+  saveDB(); renderRecettes();
+  closeModal('modal-recette');
+  toast(id ? 'Recette modifiée ✓' : 'Recette ajoutée ✓', 'success');
+}
+
+function deleteRecette() {
+  const id = document.getElementById('recette-edit-id').value;
+  if (!confirm('Supprimer cette recette ?')) return;
+  db.recettes = db.recettes.filter(r => r.id !== id);
+  saveDB(); renderRecettes();
+  closeModal('modal-recette');
+  toast('Recette supprimée', 'success');
+}
+
+function renderRecettes() {
+  const el = document.getElementById('recettes-list');
+  if (!db.recettes.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📖</div><p>Aucune recette encore.<br>Synchronise ton Google Sheet ou ajoute une recette manuellement.</p></div>';
+    return;
+  }
+  el.innerHTML = db.recettes.map((r, i) => {
+    const tag = r.tag || 'T';
+    const tagLabel = TAG_LABELS[tag] || tag;
+    const tagColor = TAG_COLORS[tag] || 'badge-gray';
+    const parts = r.nbParts || 4;
+    return `
+    <div class="recette-card" onclick="openRecetteModal('${r.id}')">
+      <div class="recette-number">${i+1}</div>
+      <div class="recette-info">
+        <div class="recette-name">${r.nom}</div>
+        <div class="recette-tags">
+          <span class="badge ${tagColor}">${tagLabel}</span>
+          <span class="badge badge-gray">👥 ${parts} parts</span>
+          ${r.fromSheet ? '<span class="badge badge-blue">Sheets</span>' : ''}
+        </div>
+        <div class="recette-ingredients">${r.ingredients.slice(0,5).join(', ')}${r.ingredients.length > 5 ? '…' : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+const GSHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnN3WJWoDKxcqbCHZefWAYpyL1aeioJ5b1EKKvFm4Jt3ruu9xnPS-NaDdHqbUTHJCvNYvUkhOAOUaY/pub?gid=0&single=true&output=csv';
+
+function updateGSheetStatus() {
+  const status = document.getElementById('gsheet-status');
+  if (!status) return;
+  if (db.lastSync) {
+    const d = new Date(db.lastSync).toLocaleString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    status.innerHTML = `<span style="color:var(--green)">✓ Dernière sync : ${d}</span> — ${db.recettes.filter(r=>r.fromSheet).length} recette(s) depuis le Sheet`;
+  } else {
+    status.innerHTML = `<span style="color:var(--gray)">Pas encore synchronisé. Clique sur le bouton pour charger tes recettes.</span>`;
+  }
+}
+
+// Tags: T = plat complet (plat + accompagnement inclus)
+//       P = plat seul (nécessite un accompagnement A)
+//       A = accompagnement seul
+const TAG_LABELS = { T: 'Complet', P: 'Plat', A: 'Accompagnement' };
+const TAG_COLORS = { T: 'badge-green', P: 'badge-amber', A: 'badge-blue' };
+
+async function syncGSheet() {
+  const btn = document.getElementById('sync-btn');
+  const status = document.getElementById('gsheet-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Synchronisation…';
+  status.textContent = 'Connexion au Google Sheet…';
+  try {
+    const resp = await fetch(GSHEET_URL);
+    if (!resp.ok) throw new Error('Impossible de lire le Google Sheet (code ' + resp.status + ')');
+    const text = await resp.text();
+    const lines = text.split('\n').filter(l => l.trim());
+    if (!lines.length) throw new Error('Le fichier est vide');
+
+    // Detect column indices from header row
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/["\r]/g,''));
+    const nomIdx  = headers.findIndex(h => ['repas','nom','name','plat','titre','recette'].some(k => h.includes(k)));
+    const ingIdx  = headers.findIndex(h => h.includes('ingr'));
+    const partIdx = headers.findIndex(h => ['part','nombre','portion','qty','quantit'].some(k => h.includes(k)));
+    const tagIdx  = headers.findIndex(h => h === 'tags' || h === 'tag');
+
+    if (nomIdx === -1) throw new Error('Colonne "Repas" introuvable dans le Sheet');
+    if (ingIdx === -1) throw new Error('Colonne "Ingrédients" introuvable dans le Sheet');
+
+    let added = 0, updated = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseCSVLine(lines[i]);
+      const nom  = (cols[nomIdx] || '').trim();
+      const ings = (cols[ingIdx] || '').trim();
+      if (!nom || !ings) continue;
+
+      const nbParts = partIdx >= 0 ? (parseInt(cols[partIdx]) || 4) : 4;
+      const tag     = tagIdx  >= 0 ? (cols[tagIdx] || '').trim().toUpperCase() : 'T';
+
+      // Parse ingredients with quantities — keep them as-is for the IA prompt
+      const ingredients = ings.split(',').map(s => s.trim()).filter(Boolean);
+
+      const recette = {
+        id: 'gs_' + nom.toLowerCase().replace(/\W+/g,'_'),
+        nom,
+        ingredients,
+        nbParts,
+        tag: ['T','P','A'].includes(tag) ? tag : 'T',
+        fromSheet: true
+      };
+
+      const existing = db.recettes.findIndex(r => r.id === recette.id || r.nom.toLowerCase() === nom.toLowerCase());
+      if (existing >= 0) { db.recettes[existing] = recette; updated++; }
+      else { db.recettes.push(recette); added++; }
+    }
+
+    db.lastSync = new Date().toISOString();
+    saveDB(); renderRecettes();
+    const syncDate = new Date().toLocaleString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    status.innerHTML = `<span style="color:var(--green)">✓ Synchronisé le ${syncDate}</span><br>${added} ajoutée(s), ${updated} mise(s) à jour — ${db.recettes.length} recettes au total`;
+    toast(`Sync réussie : ${added + updated} recette(s) ✓`, 'success');
+  } catch(e) {
+    status.innerHTML = `<span style="color:var(--red)">✗ Erreur : ${e.message}</span>`;
+    toast('Erreur : ' + e.message, 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = '🔄 Synchroniser les recettes';
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (const c of line.replace(/\r/g,'')) {
+    if (c === '"') { inQ = !inQ; continue; }
+    if (c === ',' && !inQ) { result.push(cur); cur = ''; continue; }
+    cur += c;
+  }
+  result.push(cur);
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════
+// GENERATE MENU — CLAUDE API
+// ═══════════════════════════════════════════════════════
+async function generateMenu() {
+  if (!db.apiKey) { openApiModal(); toast('Configure d\'abord ta clé API Gemini', 'error'); return; }
+  if (db.recettes.length < 5) { toast('Ajoute au moins 5 recettes d\'abord', 'error'); return; }
+
+  const startDate = document.getElementById('menu-start').value;
+  const notes = document.getElementById('menu-notes').value.trim();
+
+  showLoader('Génération du menu en cours…');
+
+  const recettesText = db.recettes.map((r, i) => {
+    const tag = r.tag || 'T';
+    const tagDesc = tag === 'T' ? 'Plat complet (plat+accompagnement inclus)' : tag === 'P' ? 'Plat seul (nécessite accompagnement A)' : 'Accompagnement seul';
+    return `${i+1}. ${r.nom} | Tag: ${tag} (${tagDesc}) | Parts de base: ${r.nbParts||4} | Ingrédients: ${r.ingredients.join(', ')}`;
+  }).join('\n');
+
+  const vacancesInfo = db.vacancesMode ? 'MODE VACANCES ACTIVÉ: ignorer les contraintes de restes.' : '';
+  const customC = db.customContraintes ? 'Contraintes supplémentaires: ' + db.customContraintes : '';
+
+  const startStr = startDate ? `La période commence le ${startDate}.` : '';
+
+  const prompt = `Tu es un planificateur de repas familial expert. Génère un menu pour 2 semaines (14 jours, du mercredi au mercredi inclus) pour une famille de 3-4 personnes.
+
+CATALOGUE DE RECETTES DISPONIBLES:
+${recettesText}
+
+RÈGLES SUR LES TAGS DE RECETTES:
+- Tag T = plat complet (plat + accompagnement déjà inclus dans les ingrédients). Peut être servi seul.
+- Tag P = plat seul, doit TOUJOURS être associé à une recette tag A (accompagnement) au même repas. Dans le champ "plat", indique "P + A" ex: "Steak haché (P) + Haricots verts (A)".
+- Tag A = accompagnement seul, ne peut pas être un plat principal, uniquement associé à un P.
+- Ne jamais servir un P sans A, ni un A sans P.
+
+RÈGLES SUR LES QUANTITÉS ET RESTES:
+- Les recettes sont définies pour leur nombre de "Parts de base" indiqué.
+- La famille fait 3-4 personnes. Pour les repas qui génèrent un reste (ex: lundi midi = reste du samedi soir), prépare la recette en quantité x2 le jour de cuisson pour avoir assez.
+- Dans la liste de courses, multiplie les quantités d'ingrédients en conséquence (x2 si le plat est cuisiné une seule fois mais sert deux repas).
+
+CONTRAINTES OBLIGATOIRES (sauf mode vacances):
+${vacancesInfo || `
+- Le menu va du mercredi au mercredi (sem 1: mer-jeu-ven-sam-dim-lun-mar-mer, sem 2: jeu-ven-sam-dim-lun-mar-mer)
+- Lundi midi (sem 1 et 2): reste du samedi ou dimanche. Ce repas peut être mangé en voiture/hors maison et doit être préparé le dimanche.
+- Mardi midi (sem 1 et 2): reste du samedi, dimanche ou lundi soir. Préparé le dimanche.
+- Jeudi midi (sem 1 et 2): reste du lundi, mardi ou mercredi.
+- Vendredi midi (sem 1 et 2): reste du jeudi soir.
+- Aucun plat ne doit être répété sur les 2 semaines.
+- Pour chaque plat qui génère un reste: indiquer dans les notes du jour de cuisson "→ reste pour [jour]" et dans le reste indiquer "← reste de [plat du jour]".
+`}
+
+${customC}
+${startStr}
+Notes spéciales pour cette période: ${notes || 'Aucune'}
+
+RÈGLE CRITIQUE: Réponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou après, sans balises markdown. Structure exacte:
+{
+  "semaine1": {
+    "mercredi": {"midi": {"plat": "...", "note": "..."}, "soir": {"plat": "...", "note": "..."}},
+    "jeudi": {"midi": {"plat": "...", "note": "..."}, "soir": {"plat": "...", "note": "..."}},
+    "vendredi": {"midi": {"plat": "...", "note": "..."}, "soir": {"plat": "...", "note": "..."}},
+    "samedi": {"midi": {"plat": "...", "note": "..."}, "soir": {"plat": "...", "note": "..."}},
+    "dimanche": {"midi": {"plat": "...", "note": "..."}, "soir": {"plat": "...", "note": "..."}},
+    "lundi": {"midi": {"plat": "Reste: [nom]", "note": "← reste de [jour]. Peut être mangé en voiture."}, "soir": {"plat": "...", "note": "..."}},
+    "mardi": {"midi": {"plat": "Reste: [nom]", "note": "← reste de [jour]. Préparé le dimanche."}, "soir": {"plat": "...", "note": "..."}}
+  },
+  "semaine2": {
+    "mercredi": {"midi": {"plat": "...", "note": "..."}, "soir": {"plat": "...", "note": "..."}},
+    "jeudi": {"midi": {"plat": "Reste: [nom]", "note": "← reste de [jour]"}, "soir": {"plat": "...", "note": "..."}},
+    "vendredi": {"midi": {"plat": "Reste: [nom]", "note": "← reste du jeudi soir"}, "soir": {"plat": "...", "note": "..."}},
+    "samedi": {"midi": {"plat": "...", "note": "..."}, "soir": {"plat": "...", "note": "..."}},
+    "dimanche": {"midi": {"plat": "...", "note": "..."}, "soir": {"plat": "...", "note": "..."}},
+    "lundi": {"midi": {"plat": "Reste: [nom]", "note": "← reste de [jour]. Peut être mangé en voiture."}, "soir": {"plat": "...", "note": "..."}},
+    "mardi": {"midi": {"plat": "Reste: [nom]", "note": "← reste de [jour]"}, "soir": {"plat": "...", "note": "..."}}
+  },
+  "liste_courses": {
+    "Légumes & Fruits": ["tomates x6", "carottes x4", "..."],
+    "Viandes & Poissons": ["poulet entier x1", "..."],
+    "Épicerie": ["pâtes 500g x2", "riz 1kg x1", "..."],
+    "Produits laitiers": ["beurre x1", "..."],
+    "Surgelés": [],
+    "Autres": []
+  },
+  "notes_generales": "..."
+}`;
+
+  try {
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${db.apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 4000,
+            responseMimeType: 'application/json'
+          }
+        })
+      }
+    );
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.error?.message || `Erreur API (${resp.status})`);
+    }
+
+    const data = await resp.json();
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    text = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+
+    const menu = JSON.parse(text);
+    db.currentMenu = menu;
+    db.currentCourses = menu.liste_courses;
+    db.checkedItems = {};
+    saveDB();
+    hideLoader();
+    renderMenu(menu);
+    toast('Menu généré avec succès ✓', 'success');
+  } catch(e) {
+    hideLoader();
+    console.error(e);
+    toast('Erreur: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER MENU
+// ═══════════════════════════════════════════════════════
+const JOURS_SEM1 = ['mercredi','jeudi','vendredi','samedi','dimanche','lundi','mardi'];
+const JOURS_SEM2 = ['mercredi','jeudi','vendredi','samedi','dimanche','lundi','mardi'];
+const JOURS_LABELS = { mercredi:'Mercredi',jeudi:'Jeudi',vendredi:'Vendredi',samedi:'Samedi',dimanche:'Dimanche',lundi:'Lundi',mardi:'Mardi' };
+
+function renderMenu(menu) {
+  if (!menu) {
+    document.getElementById('menu-display').innerHTML = '';
+    return;
+  }
+  const startDate = document.getElementById('menu-start').value;
+  let html = '';
+
+  html += `<div class="week-header">📅 Semaine 1</div>`;
+  html += renderSemaine(menu.semaine1, JOURS_SEM1, startDate, 0);
+  html += `<div class="week-header">📅 Semaine 2</div>`;
+  html += renderSemaine(menu.semaine2, JOURS_SEM2, startDate, 7);
+
+  if (menu.notes_generales) {
+    html += `<div class="card"><div class="card-title"><span class="icon">💡</span> Notes</div><p style="font-size:0.85rem;line-height:1.6;color:var(--text2)">${menu.notes_generales}</p></div>`;
+  }
+  document.getElementById('menu-display').innerHTML = html;
+}
+
+function renderSemaine(sem, jours, startDate, offset) {
+  if (!sem) return '';
+  return jours.map((jour, i) => {
+    const day = sem[jour];
+    if (!day) return '';
+    const isReste = (meal) => meal?.plat?.toLowerCase().startsWith('reste');
+    const dateStr = startDate ? getDateStr(startDate, offset + i) : '';
+    const isVac = db.vacancesMode;
+    return `
+      <div class="day-card${isVac ? ' vacances' : ''}">
+        <div class="day-header">
+          <div class="day-name">${JOURS_LABELS[jour]}</div>
+          <div class="day-date">${dateStr}</div>
+        </div>
+        ${day.midi ? `<div class="meal-slot">
+          <div class="meal-time">🌤 Midi</div>
+          <div class="meal-name">${day.midi.plat || ''}</div>
+          ${day.midi.note ? `<div class="${isReste(day.midi) ? 'meal-reste' : 'meal-prep-note'}">${day.midi.note}</div>` : ''}
+        </div>` : ''}
+        ${day.soir ? `<div class="meal-slot">
+          <div class="meal-time">🌙 Soir</div>
+          <div class="meal-name">${day.soir.plat || ''}</div>
+          ${day.soir.note ? `<div class="meal-prep-note">${day.soir.note}</div>` : ''}
+        </div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function getDateStr(startISO, offset) {
+  try {
+    const d = new Date(startISO);
+    d.setDate(d.getDate() + offset);
+    return d.toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+  } catch { return ''; }
+}
+
+// ═══════════════════════════════════════════════════════
+// COURSES
+// ═══════════════════════════════════════════════════════
+function renderCourses() {
+  const el = document.getElementById('courses-display');
+  if (!db.currentCourses) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">🛒</div><p>Génère d\'abord un menu pour obtenir la liste de courses.</p></div>';
+    return;
+  }
+  const icons = { 'Légumes & Fruits':'🥦','Viandes & Poissons':'🥩','Épicerie':'🥫','Produits laitiers':'🧀','Surgelés':'🧊','Autres':'🛍','Boulangerie':'🥖','Boissons':'🥤' };
+  let html = '';
+  for (const [section, items] of Object.entries(db.currentCourses)) {
+    if (!items?.length) continue;
+    html += `<div class="shop-section">
+      <div class="shop-section-title">${icons[section]||'🛒'} ${section}</div>`;
+    items.forEach((item, idx) => {
+      const key = section + '_' + idx;
+      const checked = db.checkedItems[key];
+      html += `<div class="shop-item ${checked ? 'checked' : ''}" onclick="toggleItem('${key}', this)">
+        <div class="shop-check">${checked ? '✓' : ''}</div>
+        <div class="shop-item-name">${extractName(item)}</div>
+        <div class="shop-item-qty">${extractQty(item)}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function extractName(item) {
+  return item.replace(/x\d+|\d+g|\d+kg|\d+L|\d+cl|\d+ml/gi,'').replace(/\s+/g,' ').trim();
+}
+function extractQty(item) {
+  const m = item.match(/x(\d+)|(\d+)(g|kg|L|cl|ml)/i);
+  return m ? m[0] : '';
+}
+
+function toggleItem(key, el) {
+  db.checkedItems[key] = !db.checkedItems[key];
+  saveDB();
+  el.classList.toggle('checked');
+  const check = el.querySelector('.shop-check');
+  check.textContent = db.checkedItems[key] ? '✓' : '';
+}
+
+function resetChecked() {
+  db.checkedItems = {}; saveDB();
+  renderCourses();
+}
+
+// ═══════════════════════════════════════════════════════
+// QR CODE
+// ═══════════════════════════════════════════════════════
+function generateQR() {
+  if (!db.currentMenu) { toast('Génère d\'abord un menu', 'error'); return; }
+  const payload = {
+    v: 1,
+    menu: db.currentMenu,
+    ts: Date.now()
+  };
+  const data = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const url = window.location.href.split('?')[0] + '?import=' + data;
+  const container = document.getElementById('qr-container');
+  container.innerHTML = '<div id="qr-code"></div>';
+  try {
+    new QRCode(document.getElementById('qr-code'), {
+      text: url,
+      width: 220, height: 220,
+      colorDark: '#2D5016',
+      colorLight: '#FDFAF5',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    toast('QR code généré ✓', 'success');
+  } catch(e) {
+    container.innerHTML = `<div style="word-break:break-all;font-size:0.7rem;color:var(--gray);max-height:200px;overflow:auto">${url}</div>`;
+    toast('QR affiché comme lien (image indisponible)', 'success');
+  }
+}
+
+function importSharedData() {
+  const raw = document.getElementById('import-data').value.trim();
+  if (!raw) { toast('Colle les données à importer', 'error'); return; }
+  try {
+    let data = raw;
+    if (raw.includes('?import=')) data = raw.split('?import=')[1];
+    const payload = JSON.parse(decodeURIComponent(escape(atob(data))));
+    if (!payload.menu) throw new Error('Format invalide');
+    db.currentMenu = payload.menu;
+    db.currentCourses = payload.menu.liste_courses;
+    db.checkedItems = {};
+    saveDB();
+    showPage('menu');
+    renderMenu(db.currentMenu);
+    toast('Menu importé avec succès ✓', 'success');
+  } catch(e) {
+    toast('Données invalides : ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// RÉGLAGES
+// ═══════════════════════════════════════════════════════
+function renderReglages() {
+  document.getElementById('api-key-input').value = db.apiKey || '';
+  updateApiBtn();
+  const ml = document.getElementById('membres-list');
+  ml.innerHTML = db.membres.map((m, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--gray-light)">
+      <span style="flex:1;font-size:0.88rem">${m}</span>
+      <button class="btn btn-danger" style="padding:5px 10px;font-size:0.75rem" onclick="removeMembre(${i})">✕</button>
+    </div>`).join('');
+}
+
+function addMembre() {
+  const v = document.getElementById('new-membre').value.trim();
+  if (!v) return;
+  db.membres.push(v); saveDB();
+  document.getElementById('new-membre').value = '';
+  renderReglages();
+}
+function removeMembre(i) {
+  db.membres.splice(i, 1); saveDB(); renderReglages();
+}
+function saveCustomContraintes() {
+  db.customContraintes = document.getElementById('contraintes-custom').value.trim();
+  saveDB(); toast('Contraintes sauvegardées ✓', 'success');
+}
+function clearAll() {
+  localStorage.removeItem(DB_KEY);
+  db = defaultDB();
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════════════
+// LOADER / TOAST
+// ═══════════════════════════════════════════════════════
+function showLoader(text) {
+  document.getElementById('loader-text').textContent = text || 'Chargement…';
+  document.getElementById('loader').classList.add('open');
+}
+function hideLoader() { document.getElementById('loader').classList.remove('open'); }
+
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  // Set default start date to next Wednesday
+  const dateInput = document.getElementById('menu-start');
+  const today = new Date();
+  const day = today.getDay(); // 0=dim, 3=mer
+  const daysUntilWed = (3 - day + 7) % 7 || 7;
+  const nextWed = new Date(today);
+  nextWed.setDate(today.getDate() + daysUntilWed);
+  dateInput.value = nextWed.toISOString().split('T')[0];
+
+  updateApiBtn();
+  updateVacancesToggle();
+
+  // Check for import param in URL
+  const params = new URLSearchParams(window.location.search);
+  const importData = params.get('import');
+  if (importData) {
+    try {
+      const payload = JSON.parse(decodeURIComponent(escape(atob(importData))));
+      if (payload.menu) {
+        db.currentMenu = payload.menu;
+        db.currentCourses = payload.menu.liste_courses;
+        db.checkedItems = {};
+        saveDB();
+        renderMenu(db.currentMenu);
+        toast('Menu importé via QR code ✓', 'success');
+        history.replaceState({}, '', window.location.pathname);
+      }
+    } catch(e) { console.error('Import QR failed', e); }
+  }
+
+  // Restore menu if exists
+  if (db.currentMenu) renderMenu(db.currentMenu);
+}
+
+init();
+</script>
+</body>
+</html>
